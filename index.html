@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Perhitungan Dosing & PAC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 30px; }
+    .container { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+    .box { background: white; padding: 20px; border-radius: 12px; width: 300px; box-shadow: 0 0 10px rgba(0,0,0,0.1); cursor: pointer; text-align: center; transition: 0.3s; }
+    .box:hover { background: #e8f0fe; }
+    .form-section { display: none; background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: 30px auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin: 10px 0 5px; }
+    input[type="number"] { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+    button { margin-top: 15px; padding: 10px 20px; border: none; background: #4CAF50; color: white; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #45a049; }
+    .result { margin-top: 15px; font-weight: bold; text-align: center; }
+    .watermark { margin-top: 60px; text-align: center; color: #888; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>Perhitungan Dosing & PAC</h1>
+<div class="container">
+  <div class="box" onclick="showForm('calibration')">
+    <h2>Kalibrasi Dosing Pump</h2>
+  </div>
+  <div class="box" onclick="showForm('pac')">
+    <h2>Perhitungan PAC</h2>
+  </div>
+</div>
+<div id="calibration" class="form-section">
+  <h2>Kalibrasi Dosing Pump</h2>
+  <label>Volume (liter):</label>
+  <input type="number" id="volume" step="0.01">
+  <label>Waktu (detik):</label>
+  <input type="number" id="waktu" step="0.01">
+  <button onclick="hitungKalibrasi()">Hitung</button>
+  <div id="hasilKalibrasi" class="result"></div>
+</div>
+<div id="pac" class="form-section">
+  <h2>Perhitungan Jumlah PAC</h2>
+  <label>Volume PAC Sekarang (mm):</label>
+  <input type="number" id="pacSekarang" step="0.01">
+  <button onclick="hitungPAC()">Hitung</button>
+  <div id="hasilPAC" class="result"></div>
+</div>
+<div class="watermark">WTP MPSI BOSKU</div>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log("Service Worker Registered", reg))
+      .catch(err => console.error("Service Worker Failed", err));
+  }
+  function showForm(formId) {
+    document.getElementById('calibration').style.display = 'none';
+    document.getElementById('pac').style.display = 'none';
+    document.getElementById(formId).style.display = 'block';
+  }
+  function hitungKalibrasi() {
+    const volume = parseFloat(document.getElementById('volume').value);
+    const waktu = parseFloat(document.getElementById('waktu').value);
+    if (isNaN(volume) || isNaN(waktu) || waktu === 0) {
+      alert("Isi semua data dengan benar.");
+      return;
+    }
+    const hasil = (volume / waktu) * 3.6;
+    document.getElementById('hasilKalibrasi').innerText = `Hasil Kalibrasi: ${hasil.toFixed(2)} L/jam`;
+  }
+  function hitungPAC() {
+    const tinggiTotal = 1700;
+    const pacSekarang = parseFloat(document.getElementById('pacSekarang').value);
+    if (isNaN(pacSekarang) || pacSekarang < 0 || pacSekarang > tinggiTotal) {
+      alert(`Isi nilai PAC sekarang dengan benar (0-${tinggiTotal} mm).`);
+      return;
+    }
+    const sisaTinggi = tinggiTotal - pacSekarang;
+    const jumlahKarung = sisaTinggi / 140;
+    document.getElementById('hasilPAC').innerText = `Jumlah karung PAC yang ditambahkan: ${jumlahKarung.toFixed(2)} karung`;
+  }
+</script>
+</body>
+</html>
